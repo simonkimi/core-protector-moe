@@ -3,7 +3,7 @@ package user
 import "core-protector-moe/util/httpUtil"
 
 type Sender struct {
-	Util *httpUtil.Util
+	Util *httpUtil.Context
 }
 
 type Server struct {

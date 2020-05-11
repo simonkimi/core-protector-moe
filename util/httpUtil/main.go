@@ -17,7 +17,7 @@ type Response struct {
 	StatusCode int
 }
 
-type Util struct {
+type Context struct {
 	Client   *http.Client
 	AuthHead string
 	AuthKey  string
@@ -59,18 +59,18 @@ func makeClient() *http.Client {
 	return client
 }
 
-func MakeUtil(authHead string, authKey string) *Util {
+func MakeUtil(authHead string, authKey string) *Context {
 	client := makeClient()
-	data := &Util{Client: client, AuthHead: authHead, AuthKey: authKey}
+	data := &Context{Client: client, AuthHead: authHead, AuthKey: authKey}
 	return data
 }
 
-func (util Util) Get(httpUrl string) (*Response, error) {
+func (context Context) Get(httpUrl string) (*Response, error) {
 	req, err := http.NewRequest("POST", httpUrl, nil)
 	if err != nil {
 		return nil, err
 	}
-	resp, err := util.Client.Do(req)
+	resp, err := context.Client.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -84,17 +84,17 @@ func (util Util) Get(httpUrl string) (*Response, error) {
 	return response, nil
 }
 
-func (util Util) Post(httpUrl string, body string) (*Response, error) {
+func (context Context) Post(httpUrl string, body string) (*Response, error) {
 	var reader *strings.Reader
 	reader = strings.NewReader(body)
 	request, err := http.NewRequest("POST", httpUrl, reader)
 	if err != nil {
 		return nil, err
 	}
-	for k, v := range headerMaker(util, httpUrl) {
+	for k, v := range headerMaker(context, httpUrl) {
 		request.Header.Set(k, v)
 	}
-	resp, err := util.Client.Do(request)
+	resp, err := context.Client.Do(request)
 	if err != nil {
 		return nil, err
 	}
@@ -116,7 +116,7 @@ func JsonToStrings(json map[string]string) string {
 	return strings.Join(jsonList, "&")
 }
 
-func headerMaker(util Util, url string) map[string]string {
+func headerMaker(util Context, url string) map[string]string {
 	if strings.Contains(url, "@self") {
 		return util.loginHeaderBuilder(url)
 	}
@@ -127,12 +127,12 @@ func headerMaker(util Util, url string) map[string]string {
 	}
 }
 
-func (util Util) loginHeaderBuilder(url string) map[string]string {
+func (context Context) loginHeaderBuilder(url string) map[string]string {
 	gmtTime := time.Now().UTC().Format(http.TimeFormat)
-	mac := hmac.New(sha1.New, []byte(util.AuthKey))
+	mac := hmac.New(sha1.New, []byte(context.AuthKey))
 	uri := strings.SplitN(url, "/", 4)
 	mac.Write([]byte("POST\n" + gmtTime + "\n/" + uri[3]))
-	auth := util.AuthHead + ":" + base64.StdEncoding.EncodeToString(mac.Sum(nil))
+	auth := context.AuthHead + ":" + base64.StdEncoding.EncodeToString(mac.Sum(nil))
 	var loginHeaders = map[string]string{
 		//"Accept-Encoding": "gzip",
 		"User-Agent":    "okhttp/3.12.1",
