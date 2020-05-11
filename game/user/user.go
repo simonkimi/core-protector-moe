@@ -1,9 +1,14 @@
 package user
 
+import "core-protector-moe/util/httpUtil"
+
 func InitUser(username string, password string, serverType int) Base {
 	var base Base
-	base.User.username = username
-	base.User.password = password
+	// 初始化登录数据
+	base.Server.FirstLogin = false
+	base.User.Username = username
+	base.User.Password = password
+	base.Server.Token = ""
 	switch serverType {
 	case 1:
 		base.Server.AuthHead = "HMS 881d3SlFucX5R5hE"
@@ -20,5 +25,9 @@ func InitUser(username string, password string, serverType int) Base {
 		base.Server.UrlVersion = "http://version.jr.moefantasy.com/index/checkVer/4.1.0/100015/2&version=4.1.0&channel=100015&market=2"
 		break
 	}
+	// 创建服务对象
+	netUtil := httpUtil.MakeUtil(base.Server.AuthHead, base.Server.AuthKey)
+	netSender := &Sender{Util: netUtil}
+	base.Sender = netSender
 	return base
 }

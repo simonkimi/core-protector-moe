@@ -1,12 +1,33 @@
 package user
 
-import "liverProtectorMoe/game/net"
+import "core-protector-moe/util/httpUtil"
+
+type Sender struct {
+	Util *httpUtil.Util
+}
+
+type Server struct {
+	FirstLogin   bool
+	Token        string
+	AuthKey      string
+	AuthHead     string
+	ResUrl       string
+	Channel      string
+	Version      string
+	UrlVersion   string
+	ResVersion   string
+	Host         string
+	LoginHead    string
+	LoginApiHead string
+	Cookie       map[string]string
+}
 
 type Base struct {
 	User struct {
-		username   string
-		password   string
+		Username   string
+		Password   string
 		ServerType int
 	}
-	Server net.Server
+	Server Server
+	Sender *Sender
 }

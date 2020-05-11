@@ -34,3 +34,8 @@ type LoginServerListBean struct {
 	DefaultServer string       `json:"defaultServer"`
 	ServerList    []ServerList `json:"serverList"`
 }
+
+type LoginGetLoginBean struct {
+	Access_token string `json:"access_token"`
+	Error        int    `json:"error"`
+}

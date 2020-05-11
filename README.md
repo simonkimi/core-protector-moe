@@ -1,2 +1,11 @@
 # 护萌宝核心
-或许真的为核心呢? 此项目不确定
+护萌宝 Golang测试版
+
+### 环境
+```
+GO_USERNAME = USERNAME
+GO_PASSWORD = YOUR_PASSWORD
+PROXY = FIDDLER_PROXY
+```
+
+现在已经完成第一次登录获取token
