@@ -17,31 +17,31 @@ type Response struct {
 	StatusCode int
 }
 
-type Context struct {
+type HttpContext struct {
 	Client   *http.Client
 	AuthHead string
 	AuthKey  string
 }
 
-type Jar struct {
+type CookieJar struct {
 	cookieStore map[string][]*http.Cookie
 }
 
-func (jar *Jar) SetCookies(u *url.URL, cookies []*http.Cookie) {
+func (cookieJar *CookieJar) SetCookies(u *url.URL, cookies []*http.Cookie) {
 	if strings.Contains(u.Host, "login") {
-		jar.cookieStore[u.Host] = cookies
+		cookieJar.cookieStore[u.Host] = cookies
 	}
 }
 
-func (jar *Jar) Cookies(u *url.URL) []*http.Cookie {
+func (cookieJar *CookieJar) Cookies(u *url.URL) []*http.Cookie {
 	if strings.Contains(u.Host, "passport") || strings.Contains(u.Host, "login") {
 		return []*http.Cookie{}
 	}
-	return jar.cookieStore[u.Host]
+	return cookieJar.cookieStore[u.Host]
 }
 
 func makeClient() *http.Client {
-	jar := &Jar{
+	jar := &CookieJar{
 		cookieStore: make(map[string][]*http.Cookie),
 	}
 	var transport *http.Transport
@@ -59,13 +59,13 @@ func makeClient() *http.Client {
 	return client
 }
 
-func MakeUtil(authHead string, authKey string) *Context {
+func MakeUtil(authHead string, authKey string) *HttpContext {
 	client := makeClient()
-	data := &Context{Client: client, AuthHead: authHead, AuthKey: authKey}
+	data := &HttpContext{Client: client, AuthHead: authHead, AuthKey: authKey}
 	return data
 }
 
-func (context Context) Get(httpUrl string) (*Response, error) {
+func (context HttpContext) Get(httpUrl string) (*Response, error) {
 	req, err := http.NewRequest("POST", httpUrl, nil)
 	if err != nil {
 		return nil, err
@@ -84,7 +84,7 @@ func (context Context) Get(httpUrl string) (*Response, error) {
 	return response, nil
 }
 
-func (context Context) Post(httpUrl string, body string) (*Response, error) {
+func (context HttpContext) Post(httpUrl string, body string) (*Response, error) {
 	var reader *strings.Reader
 	reader = strings.NewReader(body)
 	request, err := http.NewRequest("POST", httpUrl, reader)
@@ -116,7 +116,7 @@ func JsonToStrings(json map[string]string) string {
 	return strings.Join(jsonList, "&")
 }
 
-func headerMaker(util Context, url string) map[string]string {
+func headerMaker(util HttpContext, url string) map[string]string {
 	if strings.Contains(url, "@self") {
 		return util.loginHeaderBuilder(url)
 	}
@@ -127,7 +127,7 @@ func headerMaker(util Context, url string) map[string]string {
 	}
 }
 
-func (context Context) loginHeaderBuilder(url string) map[string]string {
+func (context HttpContext) loginHeaderBuilder(url string) map[string]string {
 	gmtTime := time.Now().UTC().Format(http.TimeFormat)
 	mac := hmac.New(sha1.New, []byte(context.AuthKey))
 	uri := strings.SplitN(url, "/", 4)

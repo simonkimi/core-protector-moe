@@ -1,7 +1,6 @@
 package main
 
 import (
-	"core-protector-moe/game/net"
 	"core-protector-moe/game/user"
 	"os"
 )
@@ -9,6 +8,8 @@ import (
 func main() {
 	username := os.Getenv("GO_USERNAME")
 	password := os.Getenv("GO_PASSWORD")
-	base := user.InitUser(username, password, 1)
-	_ = net.Login(&base)
+
+	userBase := &user.Base{}
+	userBase.InitUser(username, password, 1)
+	userBase.ServerInfo.Login()
 }

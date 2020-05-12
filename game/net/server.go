@@ -1,61 +1,60 @@
 package net
 
 import (
-	"core-protector-moe/game/user"
 	"fmt"
 )
 
 /**
 登录游戏
 */
-func Login(base *user.Base) error {
+func (server *ServerInfo) Login() error {
 	// 取游戏版本号, 初始化URL数据
-	if err := initVersion(base); err != nil {
+	if err := server.initVersion(); err != nil {
 		fmt.Println("初始化服务器失败")
 		return err
 	}
 	// 获取游戏的Token值
-	if err := initToken(base); err != nil {
+	if err := server.initToken(); err != nil {
 		fmt.Println("获取游戏Token失败")
 		return err
 	}
 	return nil
 }
 
-func initVersion(base *user.Base) error {
+func (server *ServerInfo) initVersion() error {
 	// 取游戏版本号
-	if base.Server.FirstLogin {
+	if server.FirstLogin {
 		return nil
 	}
-	gameVersionData, err := GetGameVersion(base)
+	gameVersionData, err := server.GetGameVersion()
 	if err != nil {
 		return err
 	}
-	base.Server.UrlVersion = gameVersionData.Version.NewVersionId
-	base.Server.ResVersion = gameVersionData.Version.DataVersion
-	base.Server.LoginHead = gameVersionData.LoginServer
-	base.Server.LoginApiHead = gameVersionData.HmLoginServer
-	base.Server.FirstLogin = true
+	server.UrlVersion = gameVersionData.Version.NewVersionId
+	server.ResVersion = gameVersionData.Version.DataVersion
+	server.LoginHead = gameVersionData.LoginServer
+	server.LoginApiHead = gameVersionData.HmLoginServer
+	server.FirstLogin = true
 	return nil
 }
 
-func initToken(base *user.Base) error {
-	if base.Server.Token != "" {
+func (server *ServerInfo) initToken() error {
+	if server.Token != "" {
 		return nil
 	}
-	getLoginToken(base)
+	server.getLoginToken()
 	return nil
 }
 
-func getLoginToken(base *user.Base) (string, error) {
+func (server *ServerInfo) getLoginToken() (string, error) {
 	loginJson := fmt.Sprintf("{"+
 		"\"platform\": \"0\","+
 		"\"appid\": \"0\","+
 		"\"app_server_type\": \"0\","+
 		"\"password\": \"%s\","+
 		"\"username\": \"%s\""+
-		"}", base.User.Password, base.User.Username)
-	data, err := LoginLogin(base, loginJson)
+		"}", server.User.Password, server.User.Username)
+	data, err := server.LoginLogin(loginJson)
 	if err != nil {
 		return "", err
 	}
